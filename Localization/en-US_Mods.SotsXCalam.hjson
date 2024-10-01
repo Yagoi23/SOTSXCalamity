@@ -1,0 +1,8 @@
+DamageClasses.VoidRogue.DisplayName: Void Rogue
+
+Items: {
+	EnchantedAxe: {
+		DisplayName: Enchanted Axe
+		Tooltip: ""
+	}
+}
