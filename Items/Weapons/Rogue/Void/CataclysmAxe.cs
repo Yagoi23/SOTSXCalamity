@@ -36,6 +36,11 @@ namespace CalamityMod.Items.Weapons.Rogue
             Item.shoot = ModContent.ProjectileType<EnchantedAxeProj>();
             Item.shootSpeed = 30f;
             Item.DamageType = ModContent.GetInstance<RogueDamageClass>();
+
+        }
+        public override int GetVoid(Player player)
+        {
+            return 20;
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)

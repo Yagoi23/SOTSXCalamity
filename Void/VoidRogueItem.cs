@@ -20,6 +20,7 @@ using SOTS.Biomes;
 using SotsXCalam.Void;
 using SOTS.Void;
 using SOTS;
+using CalamityMod;
 
 namespace SOTSXCALAM.Void
 {
@@ -34,7 +35,7 @@ namespace SOTSXCALAM.Void
         {
             Item.shoot = ProjectileID.PurificationPowder;
             SafeSetDefaults();
-            if (Item.DamageType == DamageClass.Melee)
+            if (Item.DamageType == ModContent.GetInstance<RogueDamageClass>())
                 Item.DamageType = ModContent.GetInstance<VoidRogue>();
             
         }
@@ -65,30 +66,8 @@ namespace SOTSXCALAM.Void
 
                 tt.Text = Language.GetTextValue("Mods.SOTS.Common.Void2", damageValue, damageWord);
 
-                if (Item.CountsAsClass(DamageClass.Melee))
-                    tt.Text = Language.GetTextValue("Mods.SOTS.Common.VoidM", damageValue, damageWord);
-
-                if (Item.CountsAsClass(DamageClass.Ranged))
+                if (Item.CountsAsClass(ModContent.GetInstance<RogueDamageClass>()))
                     tt.Text = Language.GetTextValue("Mods.SOTS.Common.VoidR", damageValue, damageWord);
-
-                if (Item.CountsAsClass(DamageClass.Magic))
-                    tt.Text = Language.GetTextValue("Mods.SOTS.Common.VoidM2", damageValue, damageWord);
-
-                if (Item.CountsAsClass(DamageClass.Summon))
-                {
-                    if (Item.type == ModContent.ItemType<Tesseract>())
-                    {
-                        tt.Text = Language.GetTextValue("Mods.SOTS.Common.VoidSPercent", damageWord);
-                    }
-                    else
-                    {
-                        tt.Text = Language.GetTextValue("Mods.SOTS.Common.VoidS", damageValue, damageWord);
-                    }
-                    TooltipLine tl = tooltips.FirstOrDefault(x => x.Name == "CritChance" && x.Mod == "Terraria");
-                    bool Found = tl != default;
-                    if (Found)
-                        tl.Hide();
-                }
             }
             string voidCostText = VoidCost(Main.LocalPlayer).ToString();
             TooltipLine tt2 = tooltips.FirstOrDefault(x => x.Name == "UseMana" && x.Mod == "Terraria");
@@ -141,23 +120,23 @@ namespace SOTSXCALAM.Void
         {
             VoidPlayer voidPlayer = VoidPlayer.ModPlayer(player);
             bool canUse = BeforeUseItem(player);
-            bool cursed = player.HasBuff(BuffID.Cursed) || (player.HasBuff(BuffID.Silenced) && Item.CountsAsClass(DamageClass.Magic));
+            bool cursed = player.HasBuff(BuffID.Cursed);
             if (cursed)
                 return false;
             int currentVoid = voidPlayer.voidMeterMax2 - voidPlayer.lootingSouls - voidPlayer.VoidMinionConsumption;
             int finalCost = VoidCost(player);
             bool canDrainMana = BeforeDrainVoid(player);
-            if ((voidPlayer.safetySwitch && canDrainMana) && voidPlayer.voidMeter < finalCost && !Item.CountsAsClass(DamageClass.Summon) && !voidPlayer.frozenVoid)
+            if ((voidPlayer.safetySwitch && canDrainMana) && voidPlayer.voidMeter < finalCost && !voidPlayer.frozenVoid)
             {
                 return false;
             }
-            if (!canUse || player.FindBuffIndex(ModContent.BuffType<VoidRecovery>()) > -1 || Item.useAnimation < 2 || (player.altFunctionUse != 2 && Item.CountsAsClass(DamageClass.Summon) && currentVoid < finalCost))
+            if (!canUse || player.FindBuffIndex(ModContent.BuffType<VoidRecovery>()) > -1 || Item.useAnimation < 2 || (player.altFunctionUse != 2 && currentVoid < finalCost))
             {
                 return false;
             }
             OnUseEffects(player);
             //Item.mana = 0;
-            if (Item.useAmmo == 0 && canDrainMana && !Item.CountsAsClass(DamageClass.Summon))
+            if (Item.useAmmo == 0 && canDrainMana)
                 DrainMana(player);
             if (Item.mana > 0)
                 player.statMana += Item.mana;
@@ -169,7 +148,7 @@ namespace SOTSXCALAM.Void
             {
                 return base.UseItem(player);
             }
-            if (Item.useAmmo != 0 && BeforeDrainVoid(player) && !Item.CountsAsClass(DamageClass.Summon))
+            if (Item.useAmmo != 0 && BeforeDrainVoid(player))
                 DrainMana(player);
             return true;
         }
@@ -206,13 +185,13 @@ namespace SOTSXCALAM.Void
             }
             if (vPlayer.GainHealthOnVoidUse > 0)
             {
-                /*float healAmount = finalCost * vPlayer.GainHealthOnVoidUse + vPlayer.StoredLifeHeals;
+                float healAmount = finalCost * vPlayer.GainHealthOnVoidUse;
                 if (healAmount >= 1)
                 {
                     player.statLife += (int)healAmount;
                     player.HealEffect((int)healAmount);
                 }
-                vPlayer.StoredLifeHeals = healAmount % 1f;*/
+                //vPlayer.StoredLifeHeals = healAmount % 1f;
             }
         }
     }
