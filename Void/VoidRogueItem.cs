@@ -17,44 +17,26 @@ using SOTS.Items;
 using System.Diagnostics;
 using SOTS.Items.AbandonedVillage;
 using SOTS.Biomes;
-using SotsXCalam.Void;
 using SOTS.Void;
 using SOTS;
 using CalamityMod;
+using SOTSXCalam.Void;
 
 namespace SOTSXCALAM.Void
 {
-    public abstract class VoidRogueItem : ModItem
+    public abstract class VoidRogueItem : VoidItem
     {
-        //public int voidUsage = 0;
-        public virtual void SafeSetDefaults()
-        {
-
-        }
-        public sealed override void SetDefaults()
+        public virtual void SafeSetDefaults(){}
+        public void SetDefaults()
         {
             Item.shoot = ProjectileID.PurificationPowder;
             SafeSetDefaults();
             if (Item.DamageType == ModContent.GetInstance<RogueDamageClass>())
                 Item.DamageType = ModContent.GetInstance<VoidRogue>();
-            
+            Item.mana = 1;
         }
 
-        public int VoidCost(Player player)
-        {
-            VoidPlayer voidPlayer = VoidPlayer.ModPlayer(player);
-            int baseCost = GetVoid(player);
-            int finalCost;
-            float voidCostMult = 1f;
-            finalCost = baseCost; 
-            return finalCost;
-        }
-        public virtual int GetVoid(Player player)
-        {
-            int cost = 1;
-            return cost;
-        }
-        public sealed override void ModifyTooltips(List<TooltipLine> tooltips)
+        public void ModifyTooltips(List<TooltipLine> tooltips)
         {
             VoidPlayer voidPlayer = VoidPlayer.ModPlayer(Main.LocalPlayer); //only the local player will see the tooltip, afterall
             TooltipLine tt = tooltips.FirstOrDefault(x => x.Name == "Damage" && x.Mod == "Terraria");
@@ -66,16 +48,15 @@ namespace SOTSXCALAM.Void
 
                 tt.Text = Language.GetTextValue("Mods.SOTS.Common.Void2", damageValue, damageWord);
 
-                if (Item.CountsAsClass(ModContent.GetInstance<RogueDamageClass>()))
-                    tt.Text = Language.GetTextValue("Mods.SOTS.Common.VoidR", damageValue, damageWord);
+                //if (Item.CountsAsClass(ModContent.GetInstance<RogueDamageClass>()))
+                    tt.Text = Language.GetTextValue("Mods.SOTS.Common.VoidM", damageValue, damageWord);
+
             }
             string voidCostText = VoidCost(Main.LocalPlayer).ToString();
             TooltipLine tt2 = tooltips.FirstOrDefault(x => x.Name == "UseMana" && x.Mod == "Terraria");
             if (tt2 != null)
             {
                 string[] splitText = tt2.Text.Split(' ');
-                //string damageValue = splitText.First();
-                //string damageWord = splitText.Last();
                 if (Item.accessory)
                     tooltips.Remove(tt2);
                 else
@@ -85,114 +66,14 @@ namespace SOTSXCALAM.Void
             }
             ModifyTooltip(tooltips);
         }
-        public virtual void ModifyTooltip(List<TooltipLine> tooltips)
-        {
+        
 
-        }
-        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            if (type != 10)
-            {
-                return true;
-            }
-            return false;
-        }
-        public sealed override bool CanConsumeAmmo(Item ammo, Player player)
-        {
-            //if(Item.useAmmo != 0 && BeforeDrainMana(player))
-            //	DrainMana(player);
-            bool canUse = BeforeConsumeAmmo(player);
-            return canUse;
-        }
-        public sealed override bool CanBeConsumedAsAmmo(Item weapon, Player player)
-        {
-            //if(Item.useAmmo != 0 && BeforeDrainMana(player))
-            //	DrainMana(player);
-            bool canUse = BeforeConsumeAmmo(player);
-            return canUse;
-        }
-        public void OnUseEffects(Player player)
-        {
-            BeadPlayer modPlayer = player.GetModPlayer<BeadPlayer>();
-            modPlayer.attackNum++;
-        }
-        public sealed override bool CanUseItem(Player player)
-        {
-            VoidPlayer voidPlayer = VoidPlayer.ModPlayer(player);
-            bool canUse = BeforeUseItem(player);
-            bool cursed = player.HasBuff(BuffID.Cursed);
-            if (cursed)
-                return false;
-            int currentVoid = voidPlayer.voidMeterMax2 - voidPlayer.lootingSouls - voidPlayer.VoidMinionConsumption;
-            int finalCost = VoidCost(player);
-            bool canDrainMana = BeforeDrainVoid(player);
-            if ((voidPlayer.safetySwitch && canDrainMana) && voidPlayer.voidMeter < finalCost && !voidPlayer.frozenVoid)
-            {
-                return false;
-            }
-            if (!canUse || player.FindBuffIndex(ModContent.BuffType<VoidRecovery>()) > -1 || Item.useAnimation < 2 || (player.altFunctionUse != 2 && currentVoid < finalCost))
-            {
-                return false;
-            }
-            OnUseEffects(player);
-            //Item.mana = 0;
-            if (Item.useAmmo == 0 && canDrainMana)
-                DrainMana(player);
-            if (Item.mana > 0)
-                player.statMana += Item.mana;
-            return true;
-        }
-        public sealed override bool? UseItem(Player player)
-        {
-            if (Item.createTile > -1)
-            {
-                return base.UseItem(player);
-            }
-            if (Item.useAmmo != 0 && BeforeDrainVoid(player))
-                DrainMana(player);
-            return true;
-        }
-        ///<summary>
-        /// return false to not consume void
-        ///</summary>
-        public virtual bool BeforeDrainVoid(Player player)
-        {
-            return true;
-        }
-        public virtual bool BeforeUseItem(Player player)
-        {
-            return true;
-        }
-        ///<summary>
-        /// return false to not consume ammo
-        ///</summary>
-        public virtual bool BeforeConsumeAmmo(Player player)
-        {
-            return true;
-        }
-        public void DrainMana(Player player)
-        {
-            DrainMana(player, VoidCost(player));
-        }
-        public static void DrainMana(Player player, float cost)
-        {
-            VoidPlayer vPlayer = VoidPlayer.ModPlayer(player);
-            float finalCost = cost;
-            if (finalCost > 0)
-            {
-                if (player.whoAmI == Main.myPlayer)
-                    vPlayer.voidMeter -= finalCost;
-            }
-            if (vPlayer.GainHealthOnVoidUse > 0)
-            {
-                float healAmount = finalCost * vPlayer.GainHealthOnVoidUse;
-                if (healAmount >= 1)
-                {
-                    player.statLife += (int)healAmount;
-                    player.HealEffect((int)healAmount);
-                }
-                //vPlayer.StoredLifeHeals = healAmount % 1f;
-            }
-        }
+
+
+       
+       
+        
+        
+        
     }
 }

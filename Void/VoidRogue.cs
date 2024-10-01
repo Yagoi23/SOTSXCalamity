@@ -10,7 +10,7 @@ using CalamityMod.CalPlayer;
 using CalamityMod.Items.Weapons.Rogue;
 using CalamityMod;
 
-namespace SotsXCalam.Void
+namespace SOTSXCalam.Void
 {
 	public class VoidRogue : DamageClass
 	{
