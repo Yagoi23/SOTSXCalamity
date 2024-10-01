@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SOTS;
-using Terraria.ModLoader;
+﻿using Terraria.ModLoader;
 using SOTS.Void;
-using CalamityMod.CalPlayer;
-using CalamityMod.Items.Weapons.Rogue;
+
 using CalamityMod;
 
 namespace SOTSXCalam.Void

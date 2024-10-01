@@ -2,9 +2,7 @@ using CalamityMod.Items.Materials;
 using CalamityMod.Projectiles.Rogue;
 using Microsoft.Xna.Framework;
 using SOTS;
-using SOTS.Void;
 using SOTSXCALAM.Void;
-using SOTS.Void;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -57,23 +55,6 @@ namespace CalamityMod.Items.Weapons.Rogue
             return true;
         }
 
-        public override void AddRecipes()
-        {
-            CreateRecipe().
-                AddIngredient<IronFrancisca>(100).
-                AddIngredient(ItemID.FallenStar, 5).
-                AddIngredient<PearlShard>(10).
-                AddIngredient(ItemID.Bone, 30).
-                AddTile(TileID.Anvils).
-                Register();
-
-            CreateRecipe().
-                AddIngredient<LeadTomahawk>(100).
-                AddIngredient(ItemID.FallenStar, 5).
-                AddIngredient<PearlShard>(10).
-                AddIngredient(ItemID.Bone, 30).
-                AddTile(TileID.Anvils).
-                Register();
-        }
+        public override void AddRecipes(){ }
     }
 }
